@@ -6,7 +6,7 @@ import Prim.Row as Row
 import Prim.RowList as RL
 import Record.Builder (Builder)
 import Record.Builder as Builder
-import Type.Prelude (class IsSymbol, Proxy(..), RLProxy(..), SProxy(..), RProxy(..))
+import Type.Prelude (class IsSymbol, Proxy(..))
 
 class ReflectRecordProxy a where
   reflectRecordProxy :: a
@@ -17,11 +17,11 @@ instance reflectRecordProxyInst ::
   ) => ReflectRecordProxy { | r } where
   reflectRecordProxy = Builder.build builder {}
     where
-      builder = reflectRecordProxyBuilder (RLProxy :: RLProxy rl)
+      builder = reflectRecordProxyBuilder (Proxy :: Proxy rl)
 
 class ReflectRecordProxyBuilder (rl :: RL.RowList Type) (i :: Row Type) (o :: Row Type)
   | rl -> i o where
-  reflectRecordProxyBuilder :: RLProxy rl -> Builder { | i } { | o }
+  reflectRecordProxyBuilder :: Proxy rl -> Builder { | i } { | o }
 
 instance reflectRecordProxyBuilderNil :: ReflectRecordProxyBuilder RL.Nil () () where
   reflectRecordProxyBuilder _ = identity
@@ -35,8 +35,8 @@ instance reflectRecordProxyBuilderConsRoute ::
   ) => ReflectRecordProxyBuilder (RL.Cons name a tail) from to where
   reflectRecordProxyBuilder _ = first <<< rest
     where
-      first = Builder.insert (SProxy :: SProxy name) reflectProxy
-      rest = reflectRecordProxyBuilder (RLProxy :: RLProxy tail)
+      first = Builder.insert (Proxy :: Proxy name) reflectProxy
+      rest = reflectRecordProxyBuilder (Proxy :: Proxy tail)
 
 -- | Various proxies that can be created
 class ReflectProxy a where
@@ -44,13 +44,3 @@ class ReflectProxy a where
 
 instance reflectProxyProxy :: ReflectProxy (Proxy a) where
   reflectProxy = Proxy
-
-instance reflectProxySProxy :: ReflectProxy (SProxy s) where
-  reflectProxy = SProxy
-
-instance reflectProxyRProxy :: ReflectProxy (RProxy s) where
-  reflectProxy = RProxy
-
-instance reflectProxyRLProxy :: ReflectProxy (RLProxy s) where
-  reflectProxy = RLProxy
-
